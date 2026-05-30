@@ -18,6 +18,9 @@ export const sendEmail = async ({ to, subject, html }) => {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
       },
+    connectionTimeout: 30000,
+  greetingTimeout: 30000,
+  socketTimeout: 30000,
     });
     await transporter.verify();
 console.log("SMTP VERIFIED");
