@@ -1,32 +1,48 @@
 import redis from "../config/redis.js";
 
+export const cacheItemsList = async (req, res, next) => {
+  try {
+    const { category, search } = req.query;
 
+    const cacheKey = `items:${
+      category || "all"
+    }:${
+      search || ""
+    }`;
 
-export const cacheItemsList = async(req,res,next)=>{
-     
-    cachekey = "items:list";
-      
-    const cachedItems = await redis.get(cachekey);
+    const cachedItems = await redis.get(cacheKey);
 
-    if(cachedItems){
-        return res.json({
-            success:true,
-            items:JSON.parse(cachedItems),
-            source:"cache"
-        })
+    if (cachedItems) {
+      return res.status(200).json({
+        success: true,
+        count: JSON.parse(cachedItems).length,
+        items: JSON.parse(cachedItems),
+        source: "cache",
+      });
     }
 
-    // intercept res.json to cache the response
+
 
     const originalJson = res.json.bind(res);
 
-    res.json = async (data)=>{
-        if(data.success && data.items){
-            await redis.set(cachekey,JSON.stringify(data.items), 'EX', 3600); // cache for 1 hour
-        }
-        originalJson(data);
-    }
+    res.json = async (data) => {
+      if (data.success && data.items) {
+        console.log("💾 Saving to Redis");
+
+        await redis.set(
+          cacheKey,
+          JSON.stringify(data.items),
+          {
+            EX: 3600, // 1 hour
+          }
+        );
+      }
+
+      return originalJson(data);
+    };
 
     next();
-       
-}
+  } catch (error) {
+    next(error);
+  }
+};
