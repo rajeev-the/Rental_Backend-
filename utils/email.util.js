@@ -19,6 +19,8 @@ export const sendEmail = async ({ to, subject, html }) => {
         pass: process.env.EMAIL_PASS,
       },
     });
+    await transporter.verify();
+console.log("SMTP VERIFIED");
 
     // Send mail
     await transporter.sendMail({
@@ -30,7 +32,7 @@ export const sendEmail = async ({ to, subject, html }) => {
 
     console.log(`📧 Email sent to ${to}`);
   } catch (error) {
-    console.error("❌ Email send failed:", error);
-    throw new Error("Email could not be sent");
-  }
+  console.error("FULL SMTP ERROR:", error);
+  throw error;
+}
 };
