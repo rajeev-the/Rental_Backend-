@@ -7,7 +7,7 @@ import{
     getItemById,
     updateItem,
     deleteItem,
-    ActivteStatus
+    ActivteStatus,
 } from "../controllers/item.controller.js";
 
 import { authenticate } from "../middleware/auth.middleware.js";
@@ -29,7 +29,7 @@ router.post("/", authenticate, createItem);
  * GET /api/v1/items
  * Public item listing
  */
-router.get("/", getAllItems,cacheItemsList);
+router.get("/",cacheItemsList ,getAllItems);
 
 /**
  * GET /api/v1/items/my
@@ -57,6 +57,8 @@ router.patch("/:id", authenticate, updateItem);
 router.delete("/:id", authenticate, deleteItem);
 
 router.post("/status/:id",authenticate,ActivteStatus);
+
+
 
 
 
