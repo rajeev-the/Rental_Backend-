@@ -82,11 +82,10 @@ export const verifyotp = async (req, res) => {
       });
     }
 
-    // 1️⃣ Find valid user with non-expired OTP
     const user = await User.findOne({
       email,
       otpExpiresAt: { $gt: Date.now() },
-    }).select("+otpHash +otpExpiresAt email currentRefreshToken");
+    }).select("+otpHash +otpExpiresAt email currentRefreshToken profileCompleted");
 
     if (!user) {
       return res.status(400).json({
@@ -94,25 +93,22 @@ export const verifyotp = async (req, res) => {
       });
     }
 
-    // 2️⃣ Hash incoming OTP
     const incomingOtpHash = createHash("sha256")
       .update(otp)
       .digest("hex");
 
-      console.log("Incoming OTP Hash:", incomingOtpHash);
-        console.log("Stored OTP Hash:", user.otpHash);
-
-    // 3️⃣ Compare OTP
     if (incomingOtpHash !== user.otpHash) {
       return res.status(400).json({
         message: "Invalid OTP",
       });
     }
 
-    // 4️⃣ Generate tokens
     const accessToken = createAccessToken({
       userId: user._id.toString(),
       email: user.email,
+      name:user.name,
+      profileCompleted: user.profileCompleted
+
     });
 
     const refreshToken = createRefreshToken({
@@ -120,25 +116,18 @@ export const verifyotp = async (req, res) => {
       email: user.email,
     });
 
-    // 5️⃣ Save refresh token & clear OTP
     user.currentRefreshToken = refreshToken;
     user.otpHash = undefined;
     user.otpExpiresAt = undefined;
 
     await user.save();
 
-    // 6️⃣ Set refresh token cookie
-    res.cookie("refresh_token", refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    });
+    console.log(user.profileCompleted);
 
-    // 7️⃣ Send response
-    res.json({
+    return res.json({
       success: true,
       accessToken,
+      refreshToken,
     });
 
   } catch (error) {
@@ -149,7 +138,6 @@ export const verifyotp = async (req, res) => {
     });
   }
 };
-
 
 //logout controller
 

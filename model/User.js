@@ -45,6 +45,9 @@ currentRefreshToken: {
   type: String, // store raw token OR hashed token (recommended)
   select: false, // don't return by default
 },
+
+profileCompleted:{type:Number,default:0},
+
 otpHash: { type: String , select: false },
 otpExpiresAt: { type: Date , select: false },
 

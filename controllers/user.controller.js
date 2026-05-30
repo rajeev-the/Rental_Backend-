@@ -1,4 +1,9 @@
 import User from "../model/User.js";
+import {
+
+  createAccessToken,
+
+} from "../utils/token.util.js";
 
 
 export const getmyprofile = async(req,res)=>{
@@ -19,44 +24,58 @@ export const getmyprofile = async(req,res)=>{
 
 }
 
-
-export const updateMyprofile = async(req,res)=>{
-    const allowedfields =[
+export const updateMyprofile = async (req, res) => {
+  const allowedfields = [
     "name",
     "year",
     "collegeEmail",
     "department",
-    "year",
     "hostelBlock",
     "roomNumber",
     "profilePicUrl",
-    ]
-    const updates = {};
-      
-    allowedfields.forEach((field)=>{
-        if(req.body[field] !== undefined){
-            updates[field] = req.body[field];
-        }
-    });
+  ];
 
-    const user = await User.findByIdAndUpdate(
-        req.user._id,
-        updates,
-        {new:true,runValidators:true}
-    ).select("otpHash -otpExpiresAt -currentRefreshToken");
+  const updates = {};
 
+  allowedfields.forEach((field) => {
+    if (req.body[field] !== undefined) {
+      updates[field] = req.body[field];
+    }
+  });
 
-    res.status(200).json({
-        success:true,
-        message:"Profile Updated Successfully",
-        user
+  const user = await User.findByIdAndUpdate(
+    req.user.userId,
+    updates,
+    { new: true, runValidators: true }
+  );
 
-    })
+  // check profile completion using UPDATED USER DATA
+  if (
+    user.name &&
+    user.year &&
+    user.collegeEmail &&
+    user.department &&
+    user.hostelBlock &&
+    user.roomNumber
+  ) {
+    user.profileCompleted = 1;
+    await user.save();
+  }
 
- 
+  const accessToken = createAccessToken({
+    userId: user._id.toString(),
+    email: user.email,
+    profileCompleted: user.profileCompleted,
+  });
+  
 
-}
-
+  res.status(200).json({
+    success: true,
+    message: "Profile Updated Successfully",
+    user,
+    accessToken,
+  });
+};
 
 export const uploadCollegeId = async(req,res)=>{
 
@@ -79,18 +98,35 @@ export const uploadCollegeId = async(req,res)=>{
         
     }
 
-    const user = await User.findById(req.user._id);
+    const user = await User.findById(req.user.userId);
 
     user.collegeImage = collegeImage;
     user.verified = true;
     
     await user.save();
 
-    res.status(200).json({
-        success:true,
-        message:"College ID images uploaded successfully",
-        user
-    })
+    // check profile completion using UPDATED USER DATA
+  if (
+    user.collegeImage
+  ) {
+    user.profileCompleted = 2;
+    await user.save();
+  }
+
+  const accessToken = createAccessToken({
+    userId: user._id.toString(),
+    email: user.email,
+    profileCompleted: user.profileCompleted,
+  });
+  
+
+  res.status(200).json({
+    success: true,
+    message: "Profile Updated Successfully of College ID images ",
+    user,
+    accessToken,
+  });
+  
         
     } catch (error) {
 
@@ -101,6 +137,9 @@ export const uploadCollegeId = async(req,res)=>{
     }
 
 }
+
+
+
 
 export const updateSocialLinks = async(req,res)=>{
    

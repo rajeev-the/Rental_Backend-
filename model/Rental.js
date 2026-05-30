@@ -1,4 +1,6 @@
+
 import mongoose from "mongoose";
+
 
 const rentalSchema = new mongoose.Schema(
   {
@@ -26,7 +28,14 @@ const rentalSchema = new mongoose.Schema(
     beforeImages: [{ type: String }],
 
     afterImages: [{ type: String }],
-
+    rentalotp:{
+     type:String,
+     select:false,
+    },
+     userotp:{
+     type:String,
+     select:false
+    },
     aiReportId: { type: mongoose.Schema.Types.ObjectId, ref: "AIReport" },
 
     disputeMessage: { type: String },

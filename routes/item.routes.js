@@ -6,10 +6,12 @@ import{
     getMyItems,
     getItemById,
     updateItem,
-    deleteItem
+    deleteItem,
+    ActivteStatus
 } from "../controllers/item.controller.js";
 
 import { authenticate } from "../middleware/auth.middleware.js";
+import { cacheItemsList } from "../middleware/cache.middleware.js";
 
 
 const router = Router();
@@ -27,7 +29,7 @@ router.post("/", authenticate, createItem);
  * GET /api/v1/items
  * Public item listing
  */
-router.get("/", getAllItems);
+router.get("/", getAllItems,cacheItemsList);
 
 /**
  * GET /api/v1/items/my
@@ -47,11 +49,14 @@ router.get("/:id", getItemById);
  */
 router.patch("/:id", authenticate, updateItem);
 
+
 /**
  * DELETE /api/v1/items/:id
  * Delete item (owner only)
  */
 router.delete("/:id", authenticate, deleteItem);
+
+router.post("/status/:id",authenticate,ActivteStatus);
 
 
 

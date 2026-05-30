@@ -9,7 +9,9 @@ import {approveRental,
     uploadAfterImages,
     confirmReturn,
     getMyRentals,
-    getRentalById
+    getRentalById,
+    getMyRentalsUsers,
+    getRentalByIdOwner
 
 
 } from "../controllers/rental.controller.js";
@@ -61,12 +63,18 @@ router.post("/:id/confirm-return", authenticate, confirmReturn);
 
 router.get("/my", authenticate, getMyRentals);
 
+router.get("/my-rentals", authenticate, getMyRentalsUsers);
+
 /**
  * GET /api/v1/rentals/:id
  * Get rental by ID
  */
 
 router.get("/:id", authenticate, getRentalById);
+
+router.get("/owner/:id", authenticate, getRentalByIdOwner);
+
+
 
 
 
