@@ -60,6 +60,8 @@ export const createItem = async (req,res)=>{
 export const getAllItems = async(req,res)=>{
     const {category,search} = req.query;
 
+
+
     const filer ={ status:"available" };
 
     if(category){
@@ -77,6 +79,8 @@ export const getAllItems = async(req,res)=>{
     count: items.length,
     items,
   });
+
+  console.log("mongoose db")
 
 }
 
@@ -202,6 +206,7 @@ export const deleteItem = async (req, res) => {
   });
 
  }
- 
+
+
 
 
